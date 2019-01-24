@@ -1,0 +1,20 @@
+using gcc ;
+project
+  : requirements
+		<define>ICE_CPP11_MAPPING
+		<cxxflags>"-std=c++17 -fvisibility=hidden -fvisibility-inlines-hidden"
+		<linkflags>"-Wl,-z,defs,--warn-once,--gc-sections"
+		<variant>release:<cxxflags>"-flto=2"
+		<variant>release:<linkflags>"-flto=2"
+		<variant>debug:<cxxflags>"-W -Wall -Wextra -Werror -Wwrite-strings"
+		<variant>coverage:<cxxflags>"--coverage"
+		<variant>coverage:<linkflags>"--coverage"
+	;
+lib Ice : : <name>Ice++11 ;
+lib pthread ;
+lib boost_program_options ;
+lib adhocutil : : : : <include>"/usr/include/adhocutil" ;
+exe check_ice : check_ice.cpp : <library>Ice <library>pthread <library>boost_program_options <use>adhocutil ;
+explicit install ;
+install install : check_ice : <location>/usr/lib/nagios/plugins/ ;
+
