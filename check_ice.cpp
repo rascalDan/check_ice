@@ -1,5 +1,6 @@
 #include <Ice/Initialize.h>
 #include <boost/program_options.hpp>
+#include <chrono>
 #include <compileTimeFormatter.h>
 
 namespace po = boost::program_options;
@@ -29,8 +30,8 @@ main(int argc, char ** argv)
 {
 	std::string host, protocol;
 	Ice::StringSeq objects;
-	unsigned int warn, crit;
-	uint32_t port;
+	float warn {1000}, crit {5000};
+	uint32_t port {};
 
 	po::options_description opts("Check ICE object");
 	// clang-format off
@@ -69,10 +70,12 @@ main(int argc, char ** argv)
 					p->ice_ping();
 				});
 				Good::write(std::cout, object, t_taken_ms);
-				if (t_taken_ms > crit)
+				if (t_taken_ms > crit) {
 					atLeast(rtn, 2);
-				if (t_taken_ms > warn)
+				}
+				if (t_taken_ms > warn) {
 					atLeast(rtn, 1);
+				}
 			}
 			catch (const std::exception & ex) {
 				Bad::write(std::cout, object, ex.what());
