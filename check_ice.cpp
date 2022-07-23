@@ -8,6 +8,7 @@ namespace po = boost::program_options;
 AdHocFormatter(EndpointFmt, "%?:%? -h %? -p %?");
 AdHocFormatter(Good, " OK: %? %?ms");
 AdHocFormatter(Bad, " Bad: %? %?");
+AdHocFormatter(Perf, " %?=%?ms;%?;%?;0");
 
 template<typename T>
 T &
@@ -63,6 +64,7 @@ main(int argc, char ** argv)
 		int rtn = 0;
 
 		std::cout << "ICE";
+		std::stringstream perf {"|", std::ios_base::app | std::ios_base::out};
 		for (const auto & object : objects) {
 			try {
 				auto p = ic->stringToProxy(EndpointFmt::get(object, protocol, host, port));
@@ -76,6 +78,7 @@ main(int argc, char ** argv)
 				if (t_taken_ms > warn) {
 					atLeast(rtn, 1);
 				}
+				Perf::write(perf, object, t_taken_ms, warn, crit);
 			}
 			catch (const std::exception & ex) {
 				Bad::write(std::cout, object, ex.what());
@@ -83,7 +86,7 @@ main(int argc, char ** argv)
 			}
 		}
 		ic->destroy();
-		std::cout << "\n";
+		std::cout << perf.view() << "\n";
 		return rtn;
 	}
 	catch (const std::exception & ex) {
